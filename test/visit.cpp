@@ -135,3 +135,8 @@ TEST(VisitR, Typical) {
   static_assert(std::is_same<decltype(result), int>::value, "");
   EXPECT_EQ(42, result);
 }
+
+TEST(VisitR, Void) {
+  mpark::variant<int, long> v = 42L;
+  mpark::visit<void>([](auto x) { return x; }, v);
+}
