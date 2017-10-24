@@ -1769,13 +1769,26 @@ namespace mpark {
 
     template <typename... Vs>
     inline constexpr R operator()(Vs &&... vs) const {
-      return lib::invoke(lib::forward<Visitor>(visitor_), lib::forward<Vs>(vs)...);
+      return impl(std::is_void<R>{}, lib::forward<Vs>(vs)...);
+    }
+
+    private:
+    template <typename... Vs>
+    inline constexpr void impl(std::true_type, Vs &&... vs) const {
+      lib::invoke(lib::forward<Visitor>(visitor_), lib::forward<Vs>(vs)...);
+    }
+
+    template <typename... Vs>
+    inline constexpr R impl(std::false_type, Vs &&... vs) const {
+      return lib::invoke(lib::forward<Visitor>(visitor_),
+                         lib::forward<Vs>(vs)...);
     }
   };
 
   template <typename R, typename Visitor, typename... Vs>
   inline constexpr R visit(Visitor &&visitor, Vs &&... vs) {
-    return visit(explicit_visitor<R, Visitor>{std::forward<Visitor>(visitor)}, std::forward<Vs>(vs)...);
+    return visit(explicit_visitor<R, Visitor>{std::forward<Visitor>(visitor)},
+                 std::forward<Vs>(vs)...);
   }
 
   template <typename... Ts>
